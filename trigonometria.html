@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Funciones Trigonométricas</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#e8eaf2;--text2:#8b90a8;--text3:#555c78;
+  --accent:#4f8ef7;--green:#34c48a;--amber:#f5a623;--red:#f06060;--purple:#a78bfa;--teal:#2dd4bf;
+  --radius:10px;--radius-lg:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100%}
+body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+
+/* ── Header ── */
+header{display:flex;align-items:center;gap:12px;padding:0 16px;height:50px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;position:sticky;top:0;z-index:10}
+.hicon{width:28px;height:28px;background:linear-gradient(135deg,#4f8ef7,#a78bfa);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+header h1{font-size:14px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
+.hsub{font-size:11px;color:var(--text3);margin-left:auto;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+
+/* ── Presentation button ── */
+.btn-pres{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 14px;
+  background:linear-gradient(135deg,#a78bfa,#6366f1);
+  border:none;border-radius:var(--radius);
+  color:#fff;font-size:12px;font-weight:700;
+  font-family:'Outfit',sans-serif;letter-spacing:.04em;
+  cursor:pointer;transition:opacity .2s,transform .1s;
+  white-space:nowrap;flex-shrink:0;margin-left:12px;
+}
+.btn-pres:hover{opacity:.88}
+.btn-pres:active{transform:scale(.97)}
+
+/* ── Desktop layout ── */
+main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px);height:calc(100dvh - 50px)}
+.left{order:1;width:310px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:12px}
+.left::-webkit-scrollbar{width:4px}
+.left::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.right{order:2;flex:1;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;min-width:0}
+
+/* ── Mobile ── */
+@media(max-width:699px){
+  body{overflow-y:auto}
+  main{flex-direction:column;height:auto;overflow:visible}
+  .left{width:100%;border-right:none;border-top:1px solid var(--border);overflow-y:visible;order:2;padding:14px 12px 32px}
+  .right{order:1;height:55vw;min-height:200px;max-height:320px;flex-shrink:0}
+  .canvas-header h2{font-size:12px}
+  .angle-badge{font-size:11px;padding:3px 9px}
+  .legend{padding:6px 10px;gap:8px}
+  .legend-item{font-size:10px}
+  .identity{display:none}
+  .hsub{display:none}
+  .btn-pres span{display:none}
+  .btn-pres{padding:6px 10px}
+}
+@media(max-width:360px){.right{height:58vw}.res-card .fn-val{font-size:13px}}
+
+/* ── Shared controls ── */
+.section-title{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.tabs{display:flex;background:var(--surface2);border-radius:var(--radius);padding:3px;gap:3px;border:1px solid var(--border)}
+.tab{flex:1;padding:8px 6px;text-align:center;font-size:12px;font-weight:500;color:var(--text2);border-radius:8px;cursor:pointer;transition:all .2s;border:none;background:transparent;font-family:'Outfit',sans-serif;touch-action:manipulation}
+.tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(79,142,247,.35)}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.03em}
+.field input,.field select{height:42px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:15px;font-family:'JetBrains Mono',monospace;padding:0 12px;transition:border-color .2s,box-shadow .2s;outline:none;width:100%;-webkit-appearance:none;appearance:none}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.15)}
+.field input[readonly]{color:var(--text3);cursor:default;opacity:.7}
+.field select option{background:var(--surface2)}
+.radio-row{display:flex;gap:8px}
+.radio-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 8px;border:1px solid var(--border2);border-radius:var(--radius);cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all .18s;user-select:none;touch-action:manipulation}
+.radio-btn input{display:none}
+.radio-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(79,142,247,.08)}
+.card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;display:flex;flex-direction:column;gap:10px}
+.btn-row{display:flex;gap:8px}
+.btn-calc{flex:1;height:46px;background:linear-gradient(135deg,#4f8ef7,#6366f1);border:none;border-radius:var(--radius);color:#fff;font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;letter-spacing:.06em;cursor:pointer;transition:opacity .2s,transform .1s;touch-action:manipulation}
+.btn-calc:active{transform:scale(.97);opacity:.9}
+.btn-clear{height:46px;width:76px;background:transparent;border:1px solid var(--border2);border-radius:var(--radius);color:var(--text2);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .18s;touch-action:manipulation;flex-shrink:0}
+.btn-clear:active{border-color:var(--text2);color:var(--text)}
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.res-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 11px;transition:border-color .3s}
+.res-card.lit{border-color:var(--color,var(--accent))}
+.res-card .fn-name{font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.res-card .fn-val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--color,var(--text2));transition:color .3s}
+.res-card .fn-formula{font-size:10px;color:var(--text3);margin-top:2px}
+.error-msg{font-size:12px;color:#f06060;padding:8px 10px;background:rgba(240,96,96,.1);border:1px solid rgba(240,96,96,.25);border-radius:8px;display:none;line-height:1.4}
+.error-msg.show{display:block}
+.solved-badge{font-size:11px;padding:5px 10px;background:rgba(52,196,138,.1);border:1px solid rgba(52,196,138,.25);border-radius:8px;color:var(--green);display:none;text-align:center}
+.solved-badge.show{display:block}
+
+/* ── Canvas area ── */
+.canvas-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.canvas-header h2{font-size:13px;font-weight:600;color:var(--text2)}
+.angle-badge{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--amber);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.25);padding:4px 12px;border-radius:20px;white-space:nowrap}
+#canvas{display:block;flex:1;width:100%}
+.legend{display:flex;align-items:center;gap:14px;padding:8px 16px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);white-space:nowrap}
+.legend-dot{width:20px;height:3px;border-radius:2px}
+.identity{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)}
+
+/* ════════════════════════════════════════
+   PRESENTATION OVERLAY — PDF VIEWER
+════════════════════════════════════════ */
+#pres-overlay{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:#0a0c12;flex-direction:column;
+}
+#pres-overlay.open{display:flex}
+
+/* PDF canvas area */
+.pdf-viewer{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;background:#0a0c12;position:relative;
+}
+#pdf-canvas{
+  max-width:100%;max-height:100%;
+  display:block;
+  box-shadow:0 8px 40px rgba(0,0,0,.7);
+}
+.pdf-loading{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;
+  color:var(--text2);font-size:14px;
+}
+.pdf-spinner{
+  width:40px;height:40px;border:3px solid var(--border2);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Nav bar */
+.pres-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 20px;
+  background:rgba(24,28,39,0.97);
+  border-top:1px solid var(--border);
+  flex-shrink:0;gap:12px;
+}
+.pres-nav-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 20px;height:40px;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--radius);color:var(--text2);
+  font-size:14px;font-family:'Outfit',sans-serif;font-weight:600;
+  cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.pres-nav-btn:hover{border-color:var(--accent);color:var(--text);background:rgba(79,142,247,.08)}
+.pres-nav-btn:disabled{opacity:.25;cursor:default;pointer-events:none}
+.pres-counter{
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;
+  color:var(--text2);text-align:center;
+}
+.btn-close-pres{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 16px;height:40px;
+  background:transparent;border:1px solid var(--border2);
+  border-radius:var(--radius);color:var(--red);
+  font-size:13px;font-family:'Outfit',sans-serif;font-weight:600;
+  cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.btn-close-pres:hover{background:rgba(240,96,96,.1);border-color:var(--red)}
+.pdf-error{
+  color:var(--red);font-size:13px;text-align:center;padding:20px;line-height:1.6;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header>
+  <div class="hicon">△</div>
+  <h1>Funciones Trigonométricas</h1>
+  <span class="hsub">Proyecto de Matemáticas</span>
+  <button class="btn-pres" onclick="openPres()">▶ <span>Presentación</span></button>
+</header>
+
+<main>
+
+  <!-- RIGHT — canvas -->
+  <div class="right">
+    <div class="canvas-header">
+      <h2>Triángulo Rectángulo</h2>
+      <div class="angle-badge" id="badge-angle">α = —</div>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#f06060"></div>Opuesto (a)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#34c48a"></div>Adyacente (b)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Hipotenusa (c)</div>
+      <div class="identity" id="identity-label">sen²(α) + cos²(α) = 1</div>
+    </div>
+  </div>
+
+  <!-- LEFT — controls -->
+  <div class="left">
+
+    <div>
+      <div class="section-title">Modo de entrada</div>
+      <div class="tabs">
+        <button class="tab active" onclick="setMode('angulo')">Por ángulo</button>
+        <button class="tab" onclick="setMode('lados')">Por lados</button>
+      </div>
+    </div>
+
+    <!-- ── BY ANGLE ── -->
+    <div class="card" id="block-angulo">
+      <div class="section-title">Ángulo α</div>
+      <div class="field">
+        <label>Unidad</label>
+        <select id="unit" onchange="switchUnitSelect()">
+          <option value="deg">Grados (°)</option>
+          <option value="rad">Radianes (rad)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Valor del ángulo</label>
+        <input type="text" id="inp-angle" inputmode="decimal" placeholder="ej. 1.2  ó  45" oninput="recalc()">
+      </div>
+      <div class="radio-row">
+        <label class="radio-btn active" id="rb-deg" onclick="switchUnit('deg')">
+          <input type="radio" name="unit2" value="deg" checked> Grados °
+        </label>
+        <label class="radio-btn" id="rb-rad" onclick="switchUnit('rad')">
+          <input type="radio" name="unit2" value="rad"> Radianes
+        </label>
+      </div>
+    </div>
+
+    <!-- ── BY SIDES (2 known) ── -->
+    <div class="card" id="block-lados" style="display:none">
+      <div class="section-title">2 lados conocidos</div>
+
+      <!-- Pair selector -->
+      <div class="field">
+        <label>¿Cuáles 2 lados conoces?</label>
+        <select id="side-pair" onchange="onPairChange()">
+          <option value="ab">Cateto a  +  Cateto b</option>
+          <option value="ac">Cateto a  +  Hipotenusa c</option>
+          <option value="bc">Cateto b  +  Hipotenusa c</option>
+        </select>
+      </div>
+
+      <!-- Input A -->
+      <div class="field" id="field-a">
+        <label id="lbl-a">Cateto opuesto (a)</label>
+        <input type="number" id="inp-a" step="any" min="0.001" inputmode="decimal" placeholder="ej. 3" oninput="recalc()">
+      </div>
+      <!-- Input B -->
+      <div class="field" id="field-b">
+        <label id="lbl-b">Cateto adyacente (b)</label>
+        <input type="number" id="inp-b" step="any" min="0.001" inputmode="decimal" placeholder="ej. 4" oninput="recalc()">
+      </div>
+      <!-- Input C -->
+      <div class="field" id="field-c">
+        <label id="lbl-c">Hipotenusa (c)</label>
+        <input type="number" id="inp-c" step="any" min="0.001" inputmode="decimal" placeholder="ej. 5" oninput="recalc()">
+      </div>
+
+      <!-- Solved display -->
+      <div class="solved-badge" id="solved-badge">✓ Lado calculado: <span id="solved-val">—</span></div>
+    </div>
+
+    <div id="error-box" class="error-msg"></div>
+
+    <div class="btn-row">
+      <button class="btn-calc" onclick="recalc()">▶  CALCULAR</button>
+      <button class="btn-clear" onclick="clearAll()">Limpiar</button>
+    </div>
+
+    <!-- Results -->
+    <div>
+      <div class="section-title">Resultados</div>
+      <div class="results-grid">
+        <div class="res-card" id="rc-sin" style="--color:#4f8ef7"><div class="fn-name">Seno</div><div class="fn-val" id="rv-sin">—</div><div class="fn-formula">sen(α) = a/c</div></div>
+        <div class="res-card" id="rc-cos" style="--color:#34c48a"><div class="fn-name">Coseno</div><div class="fn-val" id="rv-cos">—</div><div class="fn-formula">cos(α) = b/c</div></div>
+        <div class="res-card" id="rc-tan" style="--color:#f5a623"><div class="fn-name">Tangente</div><div class="fn-val" id="rv-tan">—</div><div class="fn-formula">tan(α) = a/b</div></div>
+        <div class="res-card" id="rc-csc" style="--color:#f06060"><div class="fn-name">Cosecante</div><div class="fn-val" id="rv-csc">—</div><div class="fn-formula">csc(α) = c/a</div></div>
+        <div class="res-card" id="rc-sec" style="--color:#a78bfa"><div class="fn-name">Secante</div><div class="fn-val" id="rv-sec">—</div><div class="fn-formula">sec(α) = c/b</div></div>
+        <div class="res-card" id="rc-cot" style="--color:#2dd4bf"><div class="fn-name">Cotangente</div><div class="fn-val" id="rv-cot">—</div><div class="fn-formula">cot(α) = b/a</div></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════
+     PRESENTATION OVERLAY — PDF VIEWER
+══════════════════════════════════════════ -->
+<div id="pres-overlay">
+  <div class="pdf-viewer">
+    <div class="pdf-loading" id="pdf-loading">
+      <div class="pdf-spinner"></div>
+      <span>Cargando presentación...</span>
+    </div>
+    <canvas id="pdf-canvas" style="display:none"></canvas>
+  </div>
+  <div class="pres-nav">
+    <button class="pres-nav-btn" id="btn-prev" onclick="pdfNav(-1)">← Anterior</button>
+    <div class="pres-counter" id="pres-counter">— / —</div>
+    <button class="pres-nav-btn" id="btn-next" onclick="pdfNav(1)">Siguiente →</button>
+    <button class="btn-close-pres" onclick="closePres()">✕ Cerrar</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// CALCULATOR LOGIC
+// ════════════════════════════════════════
+let mode='angulo';
+let state={angle:0,a:0,b:0,c:0,valid:false};
+
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&m==='angulo')||(i===1&&m==='lados')));
+  document.getElementById('block-angulo').style.display=m==='angulo'?'':'none';
+  document.getElementById('block-lados').style.display=m==='lados'?'':'none';
+  if(m==='lados') onPairChange();
+  recalc();
+}
+
+function onPairChange(){
+  const pair=document.getElementById('side-pair').value;
+  // Show/hide fields and set readonly based on pair
+  const fa=document.getElementById('field-a');
+  const fb=document.getElementById('field-b');
+  const fc=document.getElementById('field-c');
+  const ia=document.getElementById('inp-a');
+  const ib=document.getElementById('inp-b');
+  const ic=document.getElementById('inp-c');
+
+  // Reset readonly
+  [ia,ib,ic].forEach(x=>{x.readOnly=false;x.style.opacity='1';});
+
+  if(pair==='ab'){
+    // know a, b → solve c
+    fc.style.display='none';
+    fa.style.display=''; fb.style.display='';
+    document.getElementById('lbl-a').textContent='Cateto opuesto (a)';
+    document.getElementById('lbl-b').textContent='Cateto adyacente (b)';
+  } else if(pair==='ac'){
+    // know a, c → solve b
+    fb.style.display='none';
+    fa.style.display=''; fc.style.display='';
+    document.getElementById('lbl-a').textContent='Cateto opuesto (a)';
+    document.getElementById('lbl-c').textContent='Hipotenusa (c)';
+  } else if(pair==='bc'){
+    // know b, c → solve a
+    fa.style.display='none';
+    fb.style.display=''; fc.style.display='';
+    document.getElementById('lbl-b').textContent='Cateto adyacente (b)';
+    document.getElementById('lbl-c').textContent='Hipotenusa (c)';
+  }
+  document.getElementById('solved-badge').classList.remove('show');
+  recalc();
+}
+
+function switchUnit(u){
+  document.getElementById('unit').value=u;
+  document.getElementById('rb-deg').classList.toggle('active',u==='deg');
+  document.getElementById('rb-rad').classList.toggle('active',u==='rad');
+  recalc();
+}
+function switchUnitSelect(){
+  const u=document.getElementById('unit').value;
+  document.getElementById('rb-deg').classList.toggle('active',u==='deg');
+  document.getElementById('rb-rad').classList.toggle('active',u==='rad');
+  recalc();
+}
+
+function parseF(id){
+  const el=document.getElementById(id);
+  const v=parseFloat((el.value||'').replace(',','.'));
+  return isNaN(v)?null:v;
+}
+function showError(msg){const el=document.getElementById('error-box');el.textContent=msg;el.classList.add('show');}
+function clearError(){document.getElementById('error-box').classList.remove('show');}
+function fmt(v){if(!isFinite(v)||Math.abs(v)>99999)return'∞';return v.toFixed(4);}
+
+function recalc(){
+  clearError();
+  document.getElementById('solved-badge').classList.remove('show');
+  let angle,a,b,c;
+
+  if(mode==='angulo'){
+    const val=parseF('inp-angle');
+    if(val===null){state.valid=false;draw();return;}
+    const u=document.getElementById('unit').value;
+    angle=u==='deg'?val*Math.PI/180:val;
+    if(angle<=0||angle>=Math.PI/2){
+      showError(u==='deg'
+        ?'El ángulo debe estar entre 0° y 90° (exclusivo). Ej: 30, 45, 60, 75...'
+        :'En radianes ingresa entre 0 y 1.5707 (π/2). Ej: 0.5236, 0.7854, 1.0472, 1.2, 1.5...');
+      state.valid=false;draw();return;
+    }
+    c=1;a=Math.sin(angle);b=Math.cos(angle);
+
+  } else {
+    const pair=document.getElementById('side-pair').value;
+
+    if(pair==='ab'){
+      a=parseF('inp-a');b=parseF('inp-b');
+      if(!a||!b||a<=0||b<=0){state.valid=false;draw();return;}
+      c=Math.sqrt(a*a+b*b);
+      showSolved(`c (Hipotenusa) = ${c.toFixed(4)}`);
+
+    } else if(pair==='ac'){
+      a=parseF('inp-a');c=parseF('inp-c');
+      if(!a||!c||a<=0||c<=0){state.valid=false;draw();return;}
+      if(a>=c){showError('El cateto a debe ser menor que la hipotenusa c.');state.valid=false;draw();return;}
+      b=Math.sqrt(c*c-a*a);
+      showSolved(`b (Cateto adyacente) = ${b.toFixed(4)}`);
+
+    } else if(pair==='bc'){
+      b=parseF('inp-b');c=parseF('inp-c');
+      if(!b||!c||b<=0||c<=0){state.valid=false;draw();return;}
+      if(b>=c){showError('El cateto b debe ser menor que la hipotenusa c.');state.valid=false;draw();return;}
+      a=Math.sqrt(c*c-b*b);
+      showSolved(`a (Cateto opuesto) = ${a.toFixed(4)}`);
+    }
+
+    angle=Math.atan2(a,b);
+  }
+
+  const s=a/c,co=b/c,t=a/b;
+  state={angle,a,b,c,valid:true};
+  const ids=['sin','cos','tan','csc','sec','cot'];
+  const vals=[s,co,t,1/s,1/co,1/t];
+  ids.forEach((id,i)=>{
+    document.getElementById('rv-'+id).textContent=fmt(vals[i]);
+    document.getElementById('rc-'+id).classList.add('lit');
+  });
+  const deg=(angle*180/Math.PI).toFixed(2);
+  document.getElementById('badge-angle').textContent=`α = ${deg}°`;
+  document.getElementById('identity-label').textContent=`sen²+cos² = ${(s*s+co*co).toFixed(6)}`;
+  draw();
+}
+
+function showSolved(txt){
+  const el=document.getElementById('solved-badge');
+  document.getElementById('solved-val').textContent=txt;
+  el.classList.add('show');
+}
+
+// ── Canvas ──
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+
+function resize(){
+  const parent=canvas.parentElement;
+  const hdr=parent.querySelector('.canvas-header');
+  const leg=parent.querySelector('.legend');
+  const W=parent.clientWidth;
+  const H=Math.max(parent.clientHeight-hdr.offsetHeight-leg.offsetHeight,10);
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  draw();
+}
+window.addEventListener('resize',()=>{clearTimeout(window._rt);window._rt=setTimeout(resize,60);});
+setTimeout(resize,150);
+
+function draw(){
+  const W=canvas.width,H=canvas.height;
+  const dpr=window.devicePixelRatio||1;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0f1117';ctx.fillRect(0,0,W,H);
+
+  ctx.save();ctx.strokeStyle='rgba(79,142,247,0.055)';ctx.lineWidth=1;
+  const step=40*dpr;
+  for(let x=step;x<W;x+=step){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=step;y<H;y+=step){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.restore();
+
+  if(!state.valid){
+    const fs=Math.min(13,W/30)*dpr;
+    ctx.fillStyle='rgba(139,144,168,0.35)';ctx.font=`${fs}px 'Outfit',sans-serif`;ctx.textAlign='center';
+    ctx.fillText('Ingresa los datos para ver el triángulo',W/2,H/2);
+    return;
+  }
+
+  const {angle,a,b,c}=state;
+  const mob=window.innerWidth<700;
+  const pad=(mob?46:76)*dpr;
+  const scale=Math.min((W-pad*2)/b,(H-pad*2)/a);
+  const sa=a*scale,sb=b*scale;
+  const ox=(W-sb)/2,oy=(H+sa)/2;
+  const pC=[ox,oy],pB=[ox+sb,oy],pA=[ox,oy-sa];
+
+  ctx.save();ctx.beginPath();ctx.moveTo(...pC);ctx.lineTo(...pB);ctx.lineTo(...pA);ctx.closePath();
+  ctx.fillStyle='rgba(79,142,247,0.07)';ctx.fill();ctx.restore();
+
+  ctx.save();ctx.shadowColor='#a78bfa';ctx.shadowBlur=10*dpr;dl(pB,pA,'#a78bfa',2.5*dpr);ctx.restore();
+  dl(pC,pB,'#34c48a',2.5*dpr);
+  dl(pC,pA,'#f06060',2.5*dpr);
+
+  const m=12*dpr;
+  ctx.beginPath();ctx.moveTo(pC[0]+m,pC[1]);ctx.lineTo(pC[0]+m,pC[1]-m);ctx.lineTo(pC[0],pC[1]-m);
+  ctx.strokeStyle='rgba(139,144,168,0.45)';ctx.lineWidth=1.5;ctx.stroke();
+
+  const arcR=(mob?22:32)*dpr;
+  ctx.beginPath();ctx.arc(pB[0],pB[1],arcR,Math.PI,Math.PI+angle,false);
+  ctx.strokeStyle='#f5a623';ctx.lineWidth=1.8*dpr;ctx.setLineDash([4*dpr,3*dpr]);ctx.stroke();ctx.setLineDash([]);
+
+  [pC,pB,pA].forEach((p,i)=>{
+    ctx.beginPath();ctx.arc(p[0],p[1],4.5*dpr,0,Math.PI*2);
+    ctx.fillStyle=['#34c48a','#f5a623','#f06060'][i];ctx.fill();
+  });
+
+  const fs=Math.max(9,Math.min(13,W/55))*dpr;
+  ctx.font=`bold ${fs}px 'JetBrains Mono',monospace`;
+  ctx.fillStyle='#f06060';ctx.textAlign='right';
+  ctx.fillText(`a=${a.toFixed(3)}`,pC[0]-8*dpr,(pC[1]+pA[1])/2+5*dpr);
+  ctx.fillStyle='#34c48a';ctx.textAlign='center';
+  ctx.fillText(`b=${b.toFixed(3)}`,(pC[0]+pB[0])/2,pC[1]+20*dpr);
+  const mx=(pB[0]+pA[0])/2,my=(pB[1]+pA[1])/2;
+  ctx.fillStyle='#a78bfa';ctx.textAlign='left';
+  ctx.fillText(`c=${c.toFixed(3)}`,mx+10*dpr,my);
+  const deg=(angle*180/Math.PI).toFixed(1);
+  ctx.fillStyle='#f5a623';ctx.textAlign='right';
+  ctx.font=`bold ${Math.max(9,fs*.9)}px 'JetBrains Mono',monospace`;
+  ctx.fillText(`α=${deg}°`,pB[0]-arcR-5*dpr,pB[1]-arcR*.5);
+  ctx.font=`500 ${Math.max(9,fs*.85)}px 'Outfit',sans-serif`;
+  ctx.fillStyle='rgba(139,144,168,0.65)';
+  ctx.textAlign='right';ctx.fillText('C',pC[0]-7*dpr,pC[1]+5*dpr);
+  ctx.textAlign='left';ctx.fillText('B',pB[0]+7*dpr,pB[1]+5*dpr);
+  ctx.textAlign='center';ctx.fillText('A',pA[0],pA[1]-10*dpr);
+}
+
+function dl([x1,y1],[x2,y2],color,width){
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+  ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.stroke();
+}
+
+function clearAll(){
+  ['inp-angle','inp-a','inp-b','inp-c'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  ['sin','cos','tan','csc','sec','cot'].forEach(id=>{
+    document.getElementById('rv-'+id).textContent='—';
+    document.getElementById('rc-'+id).classList.remove('lit');
+  });
+  document.getElementById('badge-angle').textContent='α = —';
+  document.getElementById('identity-label').textContent='sen²(α) + cos²(α) = 1';
+  document.getElementById('solved-badge').classList.remove('show');
+  clearError();state.valid=false;draw();
+}
+
+// ════════════════════════════════════════
+// PRESENTATION SYSTEM — PDF VIEWER
+// Carga "presentacion.pdf" desde la misma carpeta
+// ════════════════════════════════════════
+
+// pdf.js se carga dinámicamente al abrir la presentación
+let pdfDoc = null;
+let pdfPage = 1;
+let pdfRendering = false;
+
+function openPres() {
+  document.getElementById('pres-overlay').classList.add('open');
+  document.getElementById('pdf-canvas').style.display = 'none';
+  document.getElementById('pdf-loading').style.display = 'flex';
+  document.getElementById('pres-counter').textContent = '— / —';
+  document.getElementById('btn-prev').disabled = true;
+  document.getElementById('btn-next').disabled = true;
+
+  // Load pdf.js from CDN if not already loaded
+  if (window.pdfjsLib) {
+    loadPDF();
+  } else {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    script.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      loadPDF();
+    };
+    script.onerror = () => showPdfError('No se pudo cargar el visor de PDF. Verifica tu conexión a internet.');
+    document.head.appendChild(script);
+  }
+}
+
+function loadPDF() {
+  // The PDF must be named "presentacion.pdf" in the same folder as this HTML file
+  pdfjsLib.getDocument('presentacion.pdf').promise.then(pdf => {
+    pdfDoc = pdf;
+    pdfPage = 1;
+    renderPage(pdfPage);
+  }).catch(err => {
+    console.error(err);
+    showPdfError(
+      'No se encontró "presentacion.pdf".<br><br>' +
+      'Asegúrate de que el archivo PDF esté en la <strong>misma carpeta</strong> ' +
+      'que este archivo HTML y se llame exactamente:<br><br>' +
+      '<code style="color:#4f8ef7;font-size:15px">presentacion.pdf</code>'
+    );
+  });
+}
+
+function renderPage(num) {
+  if (!pdfDoc || pdfRendering) return;
+  pdfRendering = true;
+
+  pdfDoc.getPage(num).then(page => {
+    const canvas = document.getElementById('pdf-canvas');
+    const viewer = canvas.parentElement;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+
+    // Scale to fill the viewer while keeping aspect ratio
+    const vw = viewer.clientWidth  - 32;
+    const vh = viewer.clientHeight - 32;
+    const vp0 = page.getViewport({ scale: 1 });
+    const scale = Math.min(vw / vp0.width, vh / vp0.height) * dpr;
+    const vp = page.getViewport({ scale });
+
+    canvas.width  = vp.width;
+    canvas.height = vp.height;
+    canvas.style.width  = (vp.width  / dpr) + 'px';
+    canvas.style.height = (vp.height / dpr) + 'px';
+
+    page.render({ canvasContext: ctx, viewport: vp }).promise.then(() => {
+      pdfRendering = false;
+      document.getElementById('pdf-loading').style.display = 'none';
+      canvas.style.display = 'block';
+      document.getElementById('pres-counter').textContent = `${num} / ${pdfDoc.numPages}`;
+      document.getElementById('btn-prev').disabled = num <= 1;
+      document.getElementById('btn-next').disabled = num >= pdfDoc.numPages;
+    });
+  });
+}
+
+function pdfNav(dir) {
+  if (!pdfDoc) return;
+  const next = pdfPage + dir;
+  if (next < 1 || next > pdfDoc.numPages) return;
+  pdfPage = next;
+  renderPage(pdfPage);
+}
+
+function showPdfError(msg) {
+  document.getElementById('pdf-loading').style.display = 'none';
+  const viewer = document.querySelector('.pdf-viewer');
+  let errEl = document.getElementById('pdf-err');
+  if (!errEl) {
+    errEl = document.createElement('div');
+    errEl.id = 'pdf-err';
+    errEl.className = 'pdf-error';
+    viewer.appendChild(errEl);
+  }
+  errEl.innerHTML = msg;
+}
+
+function closePres() {
+  document.getElementById('pres-overlay').classList.remove('open');
+  // Clear error if any
+  const errEl = document.getElementById('pdf-err');
+  if (errEl) errEl.remove();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('pres-overlay').classList.contains('open')) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') pdfNav(1);
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') pdfNav(-1);
+  else if (e.key === 'Escape') closePres();
+});
+
+// Re-render on resize
+window.addEventListener('resize', () => {
+  if (document.getElementById('pres-overlay').classList.contains('open') && pdfDoc)
+    renderPage(pdfPage);
+});
+
+// Init calc
+onPairChange();
+</script>
+</body>
+</html>
